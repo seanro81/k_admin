@@ -1,0 +1,165 @@
+Задание:
+   --Создайте новый топик balanced_topic с 8 партициями и фактором репликации 3.
+         kafka-topics.sh --bootstrap-server localhost:9094 --topic balanced_topic --create --partitions 8 --replication-factor 3
+   --Определите текущее распределение партиций.
+         kafka-topics.sh --bootstrap-server localhost:9094 --describe --topic balanced_topic
+
+		 $ kafka-topics.sh --bootstrap-server localhost:9094 --describe --topic balanced_topic
+[2025-03-23 17:23:52,281] WARN [AdminClient clientId=adminclient-1] Connection to node 2 (/127.0.0.1:9096) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+[2025-03-23 17:23:52,283] WARN [AdminClient clientId=adminclient-1] Connection to node 1 (/127.0.0.1:9095) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+Topic: balanced_topic   TopicId: XQFMvreLSbS_veXFbIwFlQ PartitionCount: 8       ReplicationFactor: 3    Configs:
+        Topic: balanced_topic   Partition: 0    Leader: 1       Replicas: 1,2,0 Isr: 1,2,0
+        Topic: balanced_topic   Partition: 1    Leader: 2       Replicas: 2,0,1 Isr: 2,0,1
+        Topic: balanced_topic   Partition: 2    Leader: 0       Replicas: 0,1,2 Isr: 0,1,2
+        Topic: balanced_topic   Partition: 3    Leader: 2       Replicas: 2,1,0 Isr: 2,1,0
+        Topic: balanced_topic   Partition: 4    Leader: 1       Replicas: 1,0,2 Isr: 1,0,2
+        Topic: balanced_topic   Partition: 5    Leader: 0       Replicas: 0,2,1 Isr: 0,2,1
+        Topic: balanced_topic   Partition: 6    Leader: 2       Replicas: 2,1,0 Isr: 2,1,0
+        Topic: balanced_topic   Partition: 7    Leader: 1       Replicas: 1,0,2 Isr: 1,0,2
+   --Создайте JSON-файл reassignment.json для перераспределения партиций.
+
+
+ {
+  "version": 1,
+  "partitions": [
+    {"topic": "balanced_topic", "partition": 0, "replicas": [0, 1, 2], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 1, "replicas": [1, 2,0], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 2, "replicas": [2, 0,1], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 3, "replicas": [1, 0,2], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 4, "replicas": [0, 2,1], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 5, "replicas": [1, 2,0], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 6, "replicas": [2, 0,1], "log_dirs": ["any", "any"]},
+    {"topic": "balanced_topic", "partition": 7, "replicas": [2, 1,0], "log_dirs": ["any", "any"]}
+  ]
+}
+
+
+echo '{
+  "version": 1,
+  "partitions": [
+    {"topic": "balanced_topic", "partition": 0, "replicas": [0, 1, 2], "log_dirs": ["any", "any",  "any"]},
+    {"topic": "balanced_topic", "partition": 1, "replicas": [1, 2,0], "log_dirs": ["any", "any",  "any"]},
+    {"topic": "balanced_topic", "partition": 2, "replicas": [2, 0,1], "log_dirs": ["any", "any",  "any"]},
+    {"topic": "balanced_topic", "partition": 3, "replicas": [1, 0,2], "log_dirs": ["any", "any",  "any"]},
+    {"topic": "balanced_topic", "partition": 4, "replicas": [0, 2,1], "log_dirs": ["any", "any",  "any"]},
+    {"topic": "balanced_topic", "partition": 5, "replicas": [1, 2,0], "log_dirs": ["any", "any", "any"]},
+    {"topic": "balanced_topic", "partition": 6, "replicas": [2, 0,1], "log_dirs": ["any", "any", "any"]},
+    {"topic": "balanced_topic", "partition": 7, "replicas": [2, 1,0], "log_dirs": ["any", "any", "any"]}
+  ]
+}'  > reassignment.json
+
+   --Перераспределите партиции.
+
+    kafka-reassign-partitions.sh \
+--bootstrap-server localhost:9094 \
+--broker-list "1,2,3" \
+--topics-to-move-json-file "/tmp/reassignment.json" \
+--generate
+
+Current partition replica assignment
+{"version":1,"partitions":[]}
+
+запуск
+kafka-reassign-partitions.sh --bootstrap-server localhost:9094 --reassignment-json-file /tmp/reassignment.json --execute
+
+$ kafka-reassign-partitions.sh --bootstrap-server localhost:9094 --reassignment-json-file /tmp/reassignment.json --execute
+[2025-03-23 18:06:07,367] WARN [AdminClient clientId=reassign-partitions-tool] Connection to node 1 (/127.0.0.1:9095) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+[2025-03-23 18:06:07,370] WARN [AdminClient clientId=reassign-partitions-tool] Connection to node 2 (/127.0.0.1:9096) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+[2025-03-23 18:06:07,425] WARN [AdminClient clientId=reassign-partitions-tool] Connection to node 1 (/127.0.0.1:9095) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+Current partition replica assignment
+
+{"version":1,"partitions":[{"topic":"balanced_topic","partition":0,"replicas":[1,2,0],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":1,"replicas":[2,0,1],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":2,"replicas":[0,1,2],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":3,"replicas":[2,1,0],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":4,"replicas":[1,0,2],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":5,"replicas":[0,2,1],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":6,"replicas":[2,1,0],"log_dirs":["any","any","any"]},{"topic":"balanced_topic","partition":7,"replicas":[1,0,2],"log_dirs":["any","any","any"]}]}
+
+
+      Проверьте статус перераспределения.
+      Убедитесь, что конфигурация изменилась.
+
+[2025-03-23 18:07:13,404] WARN [AdminClient clientId=adminclient-1] Connection to node 2 (/127.0.0.1:9096) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+[2025-03-23 18:07:13,407] WARN [AdminClient clientId=adminclient-1] Connection to node 1 (/127.0.0.1:9095) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+Topic: balanced_topic   TopicId: XQFMvreLSbS_veXFbIwFlQ PartitionCount: 8       ReplicationFactor: 3    Configs:
+        Topic: balanced_topic   Partition: 0    Leader: 1       Replicas: 0,1,2 Isr: 1,2,0
+        Topic: balanced_topic   Partition: 1    Leader: 2       Replicas: 1,2,0 Isr: 2,0,1
+        Topic: balanced_topic   Partition: 2    Leader: 0       Replicas: 2,0,1 Isr: 0,1,2
+        Topic: balanced_topic   Partition: 3    Leader: 2       Replicas: 1,0,2 Isr: 2,1,0
+        Topic: balanced_topic   Partition: 4    Leader: 1       Replicas: 0,2,1 Isr: 1,0,2
+        Topic: balanced_topic   Partition: 5    Leader: 0       Replicas: 1,2,0 Isr: 0,2,1
+        Topic: balanced_topic   Partition: 6    Leader: 2       Replicas: 2,0,1 Isr: 2,1,0
+        Topic: balanced_topic   Partition: 7    Leader: 1       Replicas: 2,1,0 Isr: 1,0,2
+
+
+
+   --Смоделируйте сбой брокера:
+     a.  Остановите брокер kafka-1.
+	 docker stop kafka-1
+
+     b.  Проверьте состояние топиков после сбоя. на kafka-0
+	 kafka-topics.sh --bootstrap-server localhost:9092 --list
+	 $ kafka-topics.sh --bootstrap-server localhost:9094 --describe --topic balanced_topic
+
+	 kafka-topics.sh --bootstrap-server localhost:9094 --describe --topic balanced_topic
+[2025-03-24 17:07:56,956] WARN [AdminClient clientId=adminclient-1] Connection to node 2 (/127.0.0.1:9096) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+[2025-03-24 17:07:57,003] WARN [AdminClient clientId=adminclient-1] Connection to node 2 (/127.0.0.1:9096) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
+Topic: balanced_topic   TopicId: OACaktHYTGq2P4did61C9w PartitionCount: 8       ReplicationFactor: 3    Configs:
+        Topic: balanced_topic   Partition: 0    Leader: 0       Replicas: 0,1,2 Isr: 2,0
+        Topic: balanced_topic   Partition: 1    Leader: 2       Replicas: 1,2,0 Isr: 2,0
+        Topic: balanced_topic   Partition: 2    Leader: 2       Replicas: 2,0,1 Isr: 0,2
+        Topic: balanced_topic   Partition: 3    Leader: 0       Replicas: 1,0,2 Isr: 0,2
+        Topic: balanced_topic   Partition: 4    Leader: 0       Replicas: 0,2,1 Isr: 2,0
+        Topic: balanced_topic   Partition: 5    Leader: 2       Replicas: 1,2,0 Isr: 0,2
+        Topic: balanced_topic   Partition: 6    Leader: 2       Replicas: 2,0,1 Isr: 2,0
+        Topic: balanced_topic   Partition: 7    Leader: 2       Replicas: 2,1,0 Isr: 2,0
+
+     c.  Запустите брокер заново.
+	 docker start kafka-1
+
+     d.  Проверьте, восстановилась ли синхронизация реплик.
+
+	 Topic: balanced_topic   TopicId: OACaktHYTGq2P4did61C9w PartitionCount: 8       ReplicationFactor: 3    Configs:
+        Topic: balanced_topic   Partition: 0    Leader: 0       Replicas: 0,1,2 Isr: 2,0,1
+        Topic: balanced_topic   Partition: 1    Leader: 2       Replicas: 1,2,0 Isr: 2,0,1
+        Topic: balanced_topic   Partition: 2    Leader: 2       Replicas: 2,0,1 Isr: 0,2,1
+        Topic: balanced_topic   Partition: 3    Leader: 0       Replicas: 1,0,2 Isr: 0,2,1
+        Topic: balanced_topic   Partition: 4    Leader: 0       Replicas: 0,2,1 Isr: 2,0,1
+        Topic: balanced_topic   Partition: 5    Leader: 2       Replicas: 1,2,0 Isr: 0,2,1
+        Topic: balanced_topic   Partition: 6    Leader: 2       Replicas: 2,0,1 Isr: 2,0,1
+        Topic: balanced_topic   Partition: 7    Leader: 2       Replicas: 2,1,0 Isr: 2,0,1
+
+
+C:\"Program Files"\OpenSSL-Win64\bin\openssl req -new -nodes -x509  -days 365 -newkey rsa:2048 -keyout ca.key -out ca.crt -config ca.cnf
+
+C:\"Program Files"\OpenSSL-Win64\bin\openssl req -new  -newkey rsa:2048  -keyout kafka-1-creds/kafka-1.key -out kafka-1-creds/kafka-1.csr -config kafka-1-creds/kafka-1.cnf -nodes
+
+C:\"Program Files"\OpenSSL-Win64\bin\openssl x509 -req -days 3650 -in kafka-1-creds/kafka-1.csr -CA ca/ca.crt -CAkey ca/ca.key -CAcreateserial -out kafka-1-creds/kafka-1.crt -extfile kafka-1-creds/kafka-1.cnf -extensions v3_req
+
+
+
+C:\"Program Files"\OpenSSL-Win64\bin\openssl pkcs12 -export  -in kafka-1-creds/kafka-1.crt -inkey kafka-1-creds/kafka-1.key  -chain  -CAfile ca/ca.pem  -name kafka-1  -out kafka-1-creds/kafka-1.p12 -password pass:test123
+
+keytool -importkeystore -deststorepass test123 -destkeystore kafka-1-creds/kafka.kafka-1.keystore.pkcs12  -srckeystore kafka-1-creds/kafka-1.p12 -deststoretype PKCS12  -srcstoretype PKCS12 -noprompt -srcstorepass test123
+
+keytool -importkeystore -srckeystore kafka-1-creds/kafka-1.p12 -srcstoretype pkcs12  -destkeystore kafka-1-keystore.jks -deststoretype jks -deststorepass test123
+
+keytool -import -file ca/ca.crt -alias ca -keystore kafka-1-creds/kafka.kafka-1.truststore.jks -storepass test123  -noprompt
+
+
+Задание 2. Настройка защищённого соединения и управление доступом
+===================================================================
+Цель задания — настроить защищённое SSL-соединение для кластера Apache Kafka из трёх брокеров с использованием Docker Compose,
+создать новый топик и протестировать отправку и получение зашифрованных сообщений.
+
+Задание:
+Создайте сертификаты для каждого брокера.
+Создайте Truststore и Keystore для каждого брокера.
+
+Настройте дополнительные брокеры в режиме SSL. Ранее в курсе вы уже работали с кластером Kafka, состоящим из трёх брокеров.
+Используйте имеющийся docker-compose кластера и настройте для него SSL.
+Создать два топика:
+topic-1
+topic-2
+
+ Настроить права доступа:
+topic-1: Доступен как для продюсеров, так и для консьюмеров.
+topic-2:
+Продюсеры могут отправлять сообщения.
+Консьюмеры не имеют доступа к чтению данных.
+
