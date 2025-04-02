@@ -163,3 +163,56 @@ topic-2:
 Продюсеры могут отправлять сообщения.
 Консьюмеры не имеют доступа к чтению данных.
 
+
+Проверка коннекта
+    netstat -an | grep 9093
+
+
+/etc/kafka/server.properties
+
+/etc/kafka/kafka_server_jaas.conf
+
+https://qna.habr.com/q/1296324
+https://milvus.io/docs/ru/connect_kafka_ssl.md
+
+
+
+
+
+
+Создать два топика:
+
+topic-1
+topic-2
+ Настроить права доступа:
+topic-1: Доступен как для продюсеров, так и для консьюмеров.
+topic-2:
+Продюсеры могут отправлять сообщения.
+Консьюмеры не имеют доступа к чтению данных.
+
+
+1)  topic-1: Доступен как для продюсеров, так и для консьюмеров
+ kafka-topics --bootstrap-server localhost:29092 --topic topic-1 --create --partitions 2 --replication-factor 3
+ kafka-topics --bootstrap-server localhost:29092 --topic topic-2 --create --partitions 2 --replication-factor 3
+
+kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:consumer --operation Read --topic topic-1
+kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:consumer --operation Describe --topic topic-1
+
+
+kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:producer --operation Write --topic topic-1
+
+kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:producer --operation Write --topic topic-2
+
+
+sh-4.4$ kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --list
+Warning: support for ACL configuration directly through the authorizer is deprecated and will be removed in a future release. Please use --bootstrap-server instead to set ACLs through the admin client.
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=topic-2, patternType=LITERAL)`:
+        (principal=User:producer, host=*, operation=WRITE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=topic-1, patternType=LITERAL)`:
+        (principal=User:consumer, host=*, operation=READ, permissionType=ALLOW)
+        (principal=User:producer, host=*, operation=WRITE, permissionType=ALLOW)
+        (principal=User:consumer, host=*, operation=DESCRIBE, permissionType=ALLOW)
+
+
+kafka-configs --command-config /etc/kafka/client.properties --bootstrap-server hostname:port --entity-type brokers --entity-name <broker-ID> --alter --add-config listener.name.<listener-name>.ssl.keystore.location=<path-to-keystore.jks>
