@@ -175,6 +175,9 @@ topic-2:
 https://qna.habr.com/q/1296324
 https://milvus.io/docs/ru/connect_kafka_ssl.md
 
+Zookeeper client cannot authenticate using the 'Client' section of the supplied JAAS configuration
+1) нужно настроить зукипер
+
 
 
 
@@ -216,3 +219,27 @@ Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=topic-1, pat
 
 
 kafka-configs --command-config /etc/kafka/client.properties --bootstrap-server hostname:port --entity-type brokers --entity-name <broker-ID> --alter --add-config listener.name.<listener-name>.ssl.keystore.location=<path-to-keystore.jks>
+
+
+======================== для инфо ========================================================
+ssl.keystore.filename=kafka-1.keystore.jks
+ssl.key.credentials=kafka-1_ssl_pwd
+delete.topic.enable=true
+auto.create.topics.enable=true
+ssl.key.password=test123
+advertised.listeners=PLAINTEXT://kafka-1:29093,SSL://localhost:9093
+listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL
+ssl.truststore.filename=kafka.kafka-1.truststore.jks
+authorizer.class.name=kafka.security.authorizer.AclAuthorizer
+ssl.truststore.credentials=kafka-1_ssl_pwd
+broker.id=1
+ssl.keystore.password=test123
+listeners=PLAINTEXT://:29093,SSL://:9093
+ssl.keystore.location=/etc/kafka/secrets/kafka-1.keystore.jks
+zookeeper.connect=zookeeper:2181
+ssl.endpoint.identification.algorithm=https
+log.dirs=/var/lib/kafka/data
+offsets.topic.replication.factor=1
+listener.security.protocol=SSL
+ssl.keystore.credentials=kafka-1_ssl_pwd
+=============================================================================================
