@@ -9,6 +9,7 @@ services:
    volumes:
      - data-zookeeper-log-1:/var/lib/zookeeper/log
      - data-zookeeper-data-1:/var/lib/zookeeper/data
+     - ./jaas_conf_zoo/zookeeper_server_jaas.conf:/opt/zoo/zookeeper_server_jaas.conf
    networks:
      - confluent
    environment:
@@ -17,6 +18,13 @@ services:
      ZOOKEEPER_TICK_TIME: 2000
      ZOOKEEPER_INIT_LIMIT: 5
      ZOOKEEPER_SYNC_LIMIT: 2
+     KAFKA_OPTS:
+       -Djava.security.auth.login.config=/opt/zoo/zookeeper_server_jaas.conf
+       -Dquorum.auth.enableSasl=true
+       -Dquorum.cnxn.threads.size=20
+       -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+       -DjaasLoginRenew=3600000
+       -DrequireClientAuthScheme=sasl
 
  kafka-0:
    image: confluentinc/cp-kafka:7.4.4
@@ -33,8 +41,8 @@ services:
    volumes:
      - data-kafka-0:/var/lib/kafka/data
      - ./kafka-0-creds:/etc/kafka/secrets
-     - ./reassignment:/opt
-     - ./jaas_conf/kafka_server_jaas.conf:/opt/kafka_server_jaas.conf
+     - ./reassignment:/opt/reassignment
+     - ./jaas_conf/kafka_server_jaas.conf:/opt/kafka/kafka_server_jaas.conf
    environment:
      KAFKA_BROKER_ID: 0
      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -52,7 +60,7 @@ services:
      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-0_ssl_pwd
      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
      KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
-     KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+     KAFKA_OPTS: "-Djava.security.auth.login.config=/opt/kafka/kafka_server_jaas.conf"
 
  kafka-1:
    image: confluentinc/cp-kafka:7.4.4
@@ -69,8 +77,8 @@ services:
    volumes:
      - data-kafka-1:/var/lib/kafka/data
      - ./kafka-1-creds:/etc/kafka/secrets
-     - ./reassignment:/opt
-      - ./jaas_conf/kafka_server_jaas.conf:/opt/kafka_server_jaas.conf
+     - ./reassignment:/opt/reassignment
+      - ./jaas_conf/kafka_server_jaas.conf:/opt/kafka/kafka_server_jaas.conf
    environment:
      KAFKA_BROKER_ID: 1
      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -88,7 +96,7 @@ services:
      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-1_ssl_pwd
      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
      KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
-     KAFKA_OPTS: "-Djava.security.auth.login.config=/opt/kafka_server_jaas.conf"
+     KAFKA_OPTS: "-Djava.security.auth.login.config=/opt/kafka/kafka_server_jaas.conf"
 
  kafka-2:
      image: confluentinc/cp-kafka:7.4.4
@@ -105,8 +113,8 @@ services:
      volumes:
        - data-kafka-2:/var/lib/kafka/data
        - ./kafka-2-creds:/etc/kafka/secrets
-       - ./reassignment:/opt
-       - ./jaas_conf/kafka_server_jaas.conf:/opt/kafka_server_jaas.conf
+       - ./reassignment:/opt/reassignment
+       - ./jaas_conf/kafka_server_jaas.conf:/opt/kafka/kafka_server_jaas.conf
      environment:
        KAFKA_BROKER_ID: 2
        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -124,7 +132,7 @@ services:
        KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-2_ssl_pwd
        KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
        KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
-       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+       KAFKA_OPTS: "-Djava.security.auth.login.config=/opt/kafka/kafka_server_jaas.conf"
 volumes:
  data-zookeeper-log-1:
  data-zookeeper-data-1:

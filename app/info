@@ -178,7 +178,17 @@ https://milvus.io/docs/ru/connect_kafka_ssl.md
 Zookeeper client cannot authenticate using the 'Client' section of the supplied JAAS configuration
 1) нужно настроить зукипер
 
+https://habr.com/ru/companies/bercut/articles/764512/
 
+https://stackoverflow.com/questions/43469962/kafka-sasl-zookeeper-authentication
+
+https://stackoverflow.com/questions/43469962/kafka-sasl-zookeeper-authentication
+
+
+zookeeper  | [2025-04-08 19:00:57,014] ERROR No JAAS configuration section named 'Server' was found in '/opt/zoo/zookeeper_server_jaas.conf'. (org.apache.zookeeper.server.ServerCnxnFactory)
+zookeeper  | [2025-04-08 19:00:57,015] ERROR Unexpected exception, exiting abnormally (org.apache.zookeeper.server.ZooKeeperServerMain)
+
+kafka-1    | javax.security.auth.login.LoginException: Zookeeper client cannot authenticate using the 'Client' section of the supplied JAAS configuration: '/opt/kafka/kafka_server_jaas.conf' because of a RuntimeException: java.lang.SecurityException: java.io.IOException: /opt/kafka/kafka_server_jaas.conf (No such file or directory)
 
 
 
