@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOPIC_NAME = 'test_topic_ssl_connect'
-KAFKA_SERVERS = 'localhost:9093,localhost:9092'
+KAFKA_SERVERS = 'localhost:9093,localhost:9092,localhost:9096'
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,

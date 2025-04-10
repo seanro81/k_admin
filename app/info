@@ -201,6 +201,10 @@ topic-2:
 Продюсеры могут отправлять сообщения.
 Консьюмеры не имеют доступа к чтению данных.
 
+--------------------------------------------------------------------------------------------------
+https://stackoverflow.com/questions/69752997/kafka-topics-sh-authentication
+./kafka-topics.sh --list --bootstrap-server 10.10.10.16:9092 --command-config config.properties
+---------------------------------------------------------------------------------------------------
 
 1)  topic-1: Доступен как для продюсеров, так и для консьюмеров
  kafka-topics --bootstrap-server localhost:29092 --topic topic-1 --create --partitions 2 --replication-factor 3
