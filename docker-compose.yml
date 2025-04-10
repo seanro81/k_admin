@@ -97,7 +97,7 @@ services:
      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-1.truststore.jks
      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-1_ssl_pwd
      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
-     KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+     #KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
      KAFKA_OPTS: "-Djava.security.auth.login.config=/opt/kafka/kafka_server_jaas.conf"
  kafka-2:
      image: confluentinc/cp-kafka:7.4.4
@@ -132,7 +132,7 @@ services:
        KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-2.truststore.jks
        KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-2_ssl_pwd
        KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
-       KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+       #KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
        KAFKA_OPTS: "-Djava.security.auth.login.config=/opt/kafka/kafka_server_jaas.conf"
 volumes:
  data-zookeeper-log-1:

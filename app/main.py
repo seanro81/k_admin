@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOPIC_NAME = 'test_topic_ssl_connect'
-KAFKA_SERVERS = 'localhost:9096,localhost:9093,localhost:9092'
+KAFKA_SERVERS = 'localhost:9093,localhost:9092'
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,
@@ -43,7 +43,7 @@ async def kafka_init():
                                         security_protocol='SSL',
                                         ssl_context=cntx,
                                         sasl_plain_username='consumer',
-                                        sasl_plain_password='test123'
+                                        sasl_plain_password='test123555'
                                         )
         await aio_consumer.start()
         AIO_KAFKA_CONSUMER_START = True
