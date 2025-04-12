@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOPIC_NAME = 'test_topic_ssl_connect'
+TOPIC_NAME = 'topic-2'              #'sasl-plain-topic'
 KAFKA_SERVERS = 'localhost:9093,localhost:9092,localhost:9096'
 
 format = "%(asctime)s: %(message)s"
@@ -40,10 +40,10 @@ async def kafka_init():
                                         group_id='custom_metrics_consumer',
                                         enable_auto_commit=True,
                                         retry_backoff_ms=200,
-                                        security_protocol='SSL',
+                                        security_protocol='SASL_PLAINTEXT',
                                         ssl_context=cntx,
                                         sasl_plain_username='consumer',
-                                        sasl_plain_password='test123555'
+                                        sasl_plain_password='test123'
                                         )
         await aio_consumer.start()
         AIO_KAFKA_CONSUMER_START = True
@@ -64,10 +64,10 @@ async def send_and_consume():
         logging.info("Инициализация коннекта - отправка сообщений")
         producer = AIOKafkaProducer(client_id='producer_tst',
                                     bootstrap_servers=KAFKA_SERVERS,
-                                    security_protocol='SSL',
+                                    security_protocol='SASL_PLAINTEXT',
                                     ssl_context=cntx,
-                                    sasl_plain_username='consumer',
-                                    sasl_plain_password='test123'
+                                    sasl_plain_username='producer',
+                                    sasl_plain_password='test123',
                                     )
         await producer.start()
         res = await producer.send_and_wait(topic=TOPIC_NAME, value='test message'.encode('utf-8'))
@@ -79,6 +79,8 @@ async def send_and_consume():
         aio_consumer, start = await kafka_init()
         async for msg in aio_consumer:
             logging.info(f"KAFKA GET NEW MESSAGE:{msg.value}")
+            await aio_consumer.stop()
+            break
     except Exception as ex:
         logging.error(f"KAFKA ERROR - {str(ex)}")
 
